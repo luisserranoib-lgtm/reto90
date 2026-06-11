@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Reto 90">
+<title>Reto 90 — Luis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --red: #E24B4A;
+    --red-dim: rgba(226,75,74,0.15);
+    --red-glow: rgba(226,75,74,0.3);
+    --bg: #080808;
+    --bg2: #111111;
+    --bg3: #1A1A1A;
+    --bg4: #222222;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.1);
+    --text: #F0F0F0;
+    --text2: #888888;
+    --text3: #555555;
+    --green: #1D9E75;
+    --green-dim: rgba(29,158,117,0.15);
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --nav-h: 72px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 0; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; flex-direction: column; min-height: 100dvh; }
+
+  .screen {
+    display: none;
+    flex: 1;
+    padding: 20px 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);
+    overflow-y: auto;
+    animation: fadeUp 0.3s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: calc(var(--nav-h) + var(--safe-bottom));
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: all 0.2s;
+  }
+
+  .nav-icon {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .nav-btn.active .nav-icon::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text3);
+    transition: color 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .nav-btn.active .nav-label { color: var(--red); }
+
+  /* ── HEADER ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-top: 8px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .day-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-sm {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+
+  /* ── PROGRESS RING ── */
+  .progress-ring-wrap {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .ring-card {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ring-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  svg.ring { overflow: visible; }
+
+  .ring-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .prog-bar-wrap {
+    height: 6px;
+    background: var(--bg4);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .prog-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--red);
+    transition: width 0.5s ease;
+  }
+  .prog-bar.green { background: var(--green); }
+
+  /* ── SECTION LABEL ── */
+  .sec-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    margin-top: 24px;
+  }
+
+  /* ── CHECKLIST ── */
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .check-item:active { transform: scale(0.98); }
+
+  .check-item.done {
+    background: var(--green-dim);
+    border-color: rgba(29,158,117,0.2);
+  }
+
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+
+  .check-item.done .check-box {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .check-text { font-size: 14px; font-weight: 500; flex: 1; }
+  .check-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .check-item.done .check-text { color: var(--text2); }
+
+  /* ── STAT GRID ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-unit {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text2);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 6px;
+    align-items: stretch;
+  }
+
+  .tl-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    font-family: var(--mono);
+    width: 44px;
+    flex-shrink: 0;
+    padding-top: 14px;
+    text-align: right;
+  }
+
+  .tl-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16px;
+    flex-shrink: 0;
+  }
+
+  .tl-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--bg4);
+    margin-top: 17px;
+    flex-shrink: 0;
+  }
+
+  .tl-dot.red { background: var(--red); }
+  .tl-dot.green { background: var(--green); }
+  .tl-dot.blue { background: #378ADD; }
+  .tl-dot.amber { background: #BA7517; }
+  .tl-dot.purple { background: #9B7FD4; }
+  .tl-dot.gray { background: var(--bg4); border: 1px solid var(--border2); }
+
+  .tl-connector {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 3px;
+  }
+
+  .tl-card {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 13px;
+    margin-bottom: 0;
+  }
+
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .tl-sub { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+
+  /* ── EXERCISE TABLE ── */
+  .ex-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .ex-table th {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .ex-table td {
+    font-size: 12px;
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .ex-table tr:last-child td { border-bottom: none; }
+  .ex-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .ex-name { font-weight: 600; }
+  .ex-note { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+  /* ── TABS ── */
+  .tab-bar {
+    display: flex;
+    background: var(--bg3);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 3px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn.active {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  /* ── WEIGHT GRAPH ── */
+  .weight-graph {
+    height: 80px;
+    position: relative;
+    margin: 8px 0;
+  }
+
+  /* ── DOTS CALENDAR ── */
+  .dots-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .day-dot {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .day-dot.done { background: var(--green); border-color: var(--green); }
+  .day-dot.today { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-dim); }
+  .day-dot.fail { background: rgba(226,75,74,0.3); border-color: var(--red); }
+
+  /* ── ALERT BOX ── */
+  .alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .alert-red { background: var(--red-dim); border: 1px solid var(--red-glow); color: #F08080; }
+  .alert-green { background: var(--green-dim); border: 1px solid rgba(29,158,117,0.3); color: #6ECFAB; }
+  .alert-gray { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); }
+
+  /* ── INPUT ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  input[type="number"], input[type="text"] {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input:focus { border-color: var(--red); }
+
+  .btn-red {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-red:active { transform: scale(0.96); }
+
+  .btn-ghost {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── SYNC STATUS ── */
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+  .sync-dot.offline { background: var(--text3); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── PILL TAG ── */
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin: 2px 3px 2px 0;
+  }
+  .pill-red { background: var(--red-dim); color: var(--red); }
+  .pill-green { background: var(--green-dim); color: var(--green); }
+  .pill-gray { background: var(--bg4); color: var(--text2); }
+  .pill-blue { background: rgba(55,138,221,0.15); color: #378ADD; }
+  .pill-purple { background: rgba(155,127,212,0.15); color: #9B7FD4; }
+
+  /* ── ZONA CLARIDAD ── */
+  .claridad-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin: 12px 0;
+  }
+
+  .cla-box {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: var(--text3);
+    font-weight: 600;
+  }
+  .cla-box.done { background: var(--green); border-color: var(--green); }
+  .cla-box.today { border: 2px solid var(--red); }
+  .cla-box:active { transform: scale(0.9); }
+
+  /* ── LOADING ── */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--bg4);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    width: 100%;
+    background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    border: 1px solid var(--border);
+    padding: 20px 20px calc(var(--safe-bottom) + 20px);
+    max-height: 85dvh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+  /* ── HERO BANNER ── */
+  .hero-banner {
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(226,75,74,0.08) 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-banner::after {
+    content: attr(data-day);
+    position: absolute;
+    right: -10px;
+    top: -20px;
+    font-size: 100px;
+    font-weight: 900;
+    color: rgba(226,75,74,0.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero-day { font-size: 13px; font-weight: 600; color: var(--red); letter-spacing: 0.1em; text-transform: uppercase; }
+  .hero-title { font-size: 24px; font-weight: 700; margin: 4px 0 8px; letter-spacing: -0.5px; }
+  .hero-sub { font-size: 12px; color: var(--text2); }
+
+  /* ── SEPARADOR ── */
+  .sep { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ── NOTIF DOT ── */
+  .notif {
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    position: absolute;
+    top: 0; right: 0;
+  }
+
+  /* WEIGHT HISTORY TABLE */
+  .w-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .w-row:last-child { border-bottom: none; }
+  .w-date { color: var(--text2); }
+  .w-val { font-weight: 700; }
+  .w-diff-pos { color: var(--red); font-size: 11px; }
+  .w-diff-neg { color: var(--green); font-size: 11px; }
+
+</style>
+</head>
+<body>
+
+<div id="loadingScreen" class="loading">
+  <div style="font-size:28px; font-weight:900; letter-spacing:-1px;">RETO <span style="color:var(--red)">90</span></div>
+  <div class="spinner"></div>
+  <div style="font-size:12px; color:var(--text2)">Cargando tu progreso...</div>
+</div>
+
+<div id="mainApp" style="display:none;" class="app">
+
+  <!-- ══ SCREEN: HOY ══ -->
+  <div id="screen-hoy" class="screen active">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="greetTitle">Buenos días</div>
+        <div class="page-sub" id="todayDate">—</div>
+      </div>
+      <div>
+        <div class="day-badge" id="dayCounter">Día —</div>
+        <div style="font-size:10px; color:var(--text2); text-align:right; margin-top:4px;">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncLabel">sync</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero-banner" id="heroBanner" data-day="1">
+      <div class="hero-day" id="heroDay">LUNES</div>
+      <div class="hero-title" id="heroTitle">Lower Body</div>
+      <div class="hero-sub" id="heroPills"></div>
+    </div>
+
+    <!-- Progreso del reto -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="daysNum">—</div>
+        <div class="stat-label">Días completados</div>
+        <div class="prog-bar-wrap" style="margin-top:8px;">
+          <div class="prog-bar" id="retoProg" style="width:0%"></div>
+        </div>
+        <div style="font-size:10px; color:var(--text2);" id="retoProgLabel">0 / 90</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="streakNum">—</div>
+        <div class="stat-label">Racha actual 🔥</div>
+        <div style="font-size:11px; color:var(--text2); margin-top:6px;" id="perfectDays">— días perfectos</div>
+      </div>
+    </div>
+
+    <!-- Inamovibles de hoy -->
+    <div class="sec-label">Inamovibles de hoy</div>
+    <div id="checklistHoy"></div>
+
+    <!-- Peso de hoy -->
+    <div class="sec-label">Registro de hoy</div>
+    <div class="card">
+      <div style="font-size:13px; font-weight:600; margin-bottom:10px;">¿Cuánto pesaste hoy?</div>
+      <div class="input-row">
+        <input type="number" id="weightInput" placeholder="108.4" step="0.1" min="50" max="200">
+        <button class="btn-red" onclick="saveWeight()">Guardar</button>
+      </div>
+      <div style="font-size:11px; color:var(--text2);">Solo en ayunas los lunes. Anota cuando puedas.</div>
+    </div>
+
+    <!-- Rutina del dia -->
+    <div class="sec-label" id="rutinaLabel">Rutina de hoy</div>
+    <div id="rutinaHoy"></div>
+
+  </div>
+
+  <!-- ══ SCREEN: RUTINAS ══ -->
+  <div id="screen-rutinas" class="screen">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Rutinas</div>
+        <div class="page-sub">Gym · Tochito · Knees</div>
+      </div>
+    </div>
+
+    <div class="tab-bar" id="rutinasTabs">
+      <div class="tab-btn active" onclick="switchRutTab('gym')">Gym</div>
+      <div class="tab-btn" onclick="switchRutTab('tocho')">Tochito</div>
+      <div class="tab-btn" onclick="switchRutTab('knees')">Knees</div>
+      <div class="tab-btn" onclick="switchRutTab('partido')">Partido</div>
+      <div class="tab-btn" onclick="switchRutTab('cardio')">Cardio</div>
+    </div>
+
+    <div id="rutinasContent"></div>
+  </div>
+
+  <!-- ══ SCREEN: PROGRESO ══ -->
+  <div id="screen-progreso" class="screen">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Progreso</div>
+        <div class="page-sub">Cuerpo · Racha · Historia</div>
+      </div>
+    </div>
+
+    <!-- Medidas -->
+    <div class="sec-label">Medidas actuales</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="currWeight">—<span class="stat-unit">kg</span></div>
+        <div class="stat-label">Peso actual</div>
+        <div style="font-size:11px; color:var(--green); margin-top:4px;" id="weightChange">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">108<span class="stat-unit" style="font-size:14px;">.4</span></div>
+        <div class="stat-label">Peso inicial</div>
+        <div style="font-size:11px; color:var(--text2); margin-top:4px;">8 Jun 2026</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">88<span class="stat-unit">kg</span></div>
+        <div class="stat-label">Meta día 90</div>
+        <div style="font-size:11px; color:var(--red); margin-top:4px;">-20kg objetivo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="kgLeft">—<span class="stat-unit">kg</span></div>
+        <div class="stat-label">Por bajar</div>
+        <div style="font-size:11px; color:var(--text2); margin-top:4px;" id="pctProgress">—% del camino</div>
+      </div>
+    </div>
+
+    <!-- Historial de pesos -->
+    <div class="sec-label">Historial de peso</div>
+    <div class="card" id="weightHistory">
+      <div style="color:var(--text2); font-size:13px; text-align:center; padding:12px;">Aún no hay registros. ¡Empieza a registrar tu peso!</div>
+    </div>
+
+    <!-- Calendario de racha -->
+    <div class="sec-label">Racha — 90 días</div>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="font-size:12px; color:var(--text2);">
+          <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--green); margin-right:4px;"></span>Perfecto
+          <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:rgba(226,75,74,0.3); margin-left:10px; margin-right:4px;"></span>Falló algo
+          <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--bg4); margin-left:10px; margin-right:4px;"></span>Pendiente
+        </div>
+      </div>
+      <div class="dots-grid" id="rachaGrid"></div>
+    </div>
+
+    <!-- Stats del reto -->
+    <div class="sec-label">Estadísticas del reto</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="perfectCount">—</div>
+        <div class="stat-label">Días perfectos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="gymCount">—</div>
+        <div class="stat-label">Días de gym</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: HORARIO ══ -->
+  <div id="screen-horario" class="screen">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Horario</div>
+        <div class="page-sub">Tu día completo</div>
+      </div>
+    </div>
+
+    <div class="tab-bar" id="horarioTabs">
+      <div class="tab-btn active" onclick="switchDayTab(0)">LUN</div>
+      <div class="tab-btn" onclick="switchDayTab(1)">MAR</div>
+      <div class="tab-btn" onclick="switchDayTab(2)">MIÉ</div>
+      <div class="tab-btn" onclick="switchDayTab(3)">JUE</div>
+      <div class="tab-btn" onclick="switchDayTab(4)">VIE</div>
+      <div class="tab-btn" onclick="switchDayTab(5)">SÁB</div>
+      <div class="tab-btn" onclick="switchDayTab(6)">DOM</div>
+    </div>
+
+    <div id="horarioContent"></div>
+  </div>
+
+  <!-- ══ SCREEN: MÁS ══ -->
+  <div id="screen-mas" class="screen">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Más</div>
+        <div class="page-sub">Nutrición · Zona Claridad · Finanzas</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-btn active" onclick="switchMasTab('nutricion')">Nutrición</div>
+      <div class="tab-btn" onclick="switchMasTab('claridad')">Zona Claridad</div>
+      <div class="tab-btn" onclick="switchMasTab('trabajo')">Trabajo</div>
+      <div class="tab-btn" onclick="switchMasTab('emergencias')">Emergencias</div>
+    </div>
+
+    <div id="masContent"></div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="nav">
+    <div class="nav-btn active" onclick="showScreen('hoy')" id="nav-hoy">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Hoy</div>
+    </div>
+    <div class="nav-btn" onclick="showScreen('rutinas')" id="nav-rutinas">
+      <div class="nav-icon">💪</div>
+      <div class="nav-label">Rutinas</div>
+    </div>
+    <div class="nav-btn" onclick="showScreen('progreso')" id="nav-progreso">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Progreso</div>
+    </div>
+    <div class="nav-btn" onclick="showScreen('horario')" id="nav-horario">
+      <div class="nav-icon">📅</div>
+      <div class="nav-label">Horario</div>
+    </div>
+    <div class="nav-btn" onclick="showScreen('mas')" id="nav-mas">
+      <div class="nav-icon">⚡</div>
+      <div class="nav-label">Más</div>
+    </div>
+  </nav>
+
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7CkA7DxbI5SKPFskb5QGfRdJTs3CHH5Y",
+  authDomain: "luis-reto-90-a56b4.firebaseapp.com",
+  projectId: "luis-reto-90-a56b4",
+  storageBucket: "luis-reto-90-a56b4.firebasestorage.app",
+  messagingSenderId: "972806908941",
+  appId: "1:972806908941:web:40391a8930628f792c3944"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ─── DATOS ───────────────────────────────────────────────────────────────────
+
+const START_DATE = new Date('2026-06-08T06:00:00');
+const TOTAL_DAYS = 90;
+
+const INAMOVIBLES = [
+  { id: 'oracion', icon: '🙏', text: 'Oración y devocional', sub: 'TTB + tiempo propio. 30 min mín.' },
+  { id: 'agua', icon: '💧', text: 'Agua — 3 litros', sub: 'Cero bebidas con calorías.' },
+  { id: 'chatarra', icon: '🚫', text: 'Cero chatarra', sub: 'Sin papas, galletas, pan dulce, dulces.' },
+  { id: 'suple', icon: '💊', text: 'Creatina + colágeno', sub: 'Colágeno en ayunas. Creatina con desayuno.' },
+  { id: 'ejercicio', icon: '🏋️', text: 'Ejercicio', sub: 'Gym / Tochito / Partido según el día.' },
+  { id: 'knees', icon: '🦵', text: 'Bulletproof knees', sub: '20-25 min sin falta.' },
+  { id: 'lectura', icon: '📖', text: 'Lectura', sub: 'Libro físico. 20 min mínimo.' },
+  { id: 'claridad', icon: '⭐', text: 'Zona Claridad', sub: 'Tracking privado diario.' },
+];
+
+const DAYS_DATA = [
+  {
+    name: 'LUNES', title: 'Lower Body', sub: 'Gym mañana · Partido noche',
+    pills: [['Gym mañana','red'],['Lower body','red'],['Partido 11pm','blue'],['Knees opcional','green']],
+    blocks: [
+      {t:'6:00',ti:'Agua + colágeno + creatina',s:'1 vaso grande antes que nada.',c:'blue'},
+      {t:'6:05',ti:'TTB — Temprano Te Buscaré',s:'Oración online con pastores. ~55 min.',c:'purple'},
+      {t:'7:00',ti:'Tu tiempo con Dios',s:'15-20 min. Solo tú y Él.',c:'purple'},
+      {t:'7:20',ti:'Movilidad al despertar',s:'12 movimientos × 30s. ~7 min.',c:'green'},
+      {t:'7:30',ti:'Desayuno',s:'Proteína primero. Sin pantallas.',c:'amber'},
+      {t:'7:50',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'8:05',ti:'Gym — Lower body',s:'Calentamiento 8 min → Sillón masaje 5 min → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'9:20',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'9:50',ti:'Traslado + Ducha contraste',s:'Champú + jabón. Contraste 3 rondas. Fría al final.',c:'blue'},
+      {t:'10:25',ti:'Skincare mañana',s:'Limpiador · hidratante + SPF · drenaje linfático.',c:'gray'},
+      {t:'10:40',ti:'Trabajo — bloque 1',s:'Tarea de alto impacto primero. 2 aplicaciones de empleo.',c:'blue'},
+      {t:'1:30',ti:'Comida',s:'Proteína primero. Sin pantallas.',c:'amber'},
+      {t:'2:00',ti:'Bulletproof knees (opcional)',s:'Backwards walk 5 min + rutina.',c:'green'},
+      {t:'2:20',ti:'Trabajo — bloque 2',s:'YT, agencia, seguimiento.',c:'blue'},
+      {t:'6:30',ti:'Tiempo con Dios — tarde',s:'15-20 min. Devocional o Palabra.',c:'purple'},
+      {t:'7:00',ti:'Cena + preparación partido',s:'Proteína + carbos simples. 500ml agua.',c:'amber'},
+      {t:'11:00',ti:'Partido — Transtorna2',s:'Calentamiento 12 min antes. QB / WR / Safety.',c:'blue'},
+      {t:'12:15',ti:'Estiramiento post partido',s:'8 min en cancha. No te lo brinques.',c:'green'},
+      {t:'12:30',ti:'Llegada a casa',s:'Ducha rápida tibia. Skincare. Directo a dormir.',c:'gray'},
+    ]
+  },
+  {
+    name: 'MARTES', title: 'Upper Body', sub: 'Trabajo profundo · Gym tarde · Piano',
+    pills: [['Sin tochito','gray'],['Trabajo profundo','blue'],['Upper gym tarde','red'],['Piano noche','purple']],
+    blocks: [
+      {t:'8:00',ti:'Despertar + Ducha activación fría',s:'Solo enjuague frío 2-3 min. Sin champú.',c:'blue'},
+      {t:'8:15',ti:'Skincare mañana',s:'Limpiador en lavabo con agua tibia. Hidratante.',c:'gray'},
+      {t:'8:25',ti:'Agua + colágeno + creatina + movilidad',s:'12 movimientos · 7 min.',c:'blue'},
+      {t:'8:40',ti:'Desayuno',s:'Proteína primero.',c:'amber'},
+      {t:'9:00',ti:'Trabajo — bloque 1',s:'Día más productivo. Foco profundo.',c:'blue'},
+      {t:'1:00',ti:'Comida',s:'Proteína primero. Camina 10 min antes.',c:'amber'},
+      {t:'1:30',ti:'Bulletproof knees',s:'Backwards walk 5 min + rutina 20-25 min.',c:'green'},
+      {t:'2:00',ti:'Trabajo — bloque 2',s:'Calls, entregas, agencia, aplicaciones.',c:'blue'},
+      {t:'5:00',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'5:15',ti:'Gym — Upper body',s:'Calentamiento → Sillón masaje → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'6:30',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'7:00',ti:'Traslado + Ducha contraste',s:'Champú + jabón. Contraste 3 rondas. Fría al final.',c:'blue'},
+      {t:'7:35',ti:'Skincare noche',s:'Limpiador · hidratante · minoxidil · manos · tapes.',c:'gray'},
+      {t:'7:50',ti:'Cena',s:'Ligera. Proteína + verduras.',c:'amber'},
+      {t:'8:20',ti:'Piano / teoría musical',s:'30-45 min. Práctica activa.',c:'purple'},
+      {t:'9:00',ti:'Lectura',s:'20-30 min. Libro físico.',c:'purple'},
+      {t:'9:30',ti:'Oración nocturna extendida',s:'30 min. Momento principal con Dios el martes.',c:'purple'},
+      {t:'10:00',ti:'Dormir',s:'Deja ropa de tochito lista para mañana.',c:'gray'},
+    ]
+  },
+  {
+    name: 'MIÉRCOLES', title: 'Tochito + Legs', sub: 'Agilidad mañana · Gym tarde',
+    pills: [['Tochito mañana','blue'],['Agilidad','blue'],['Knees mediodía','green'],['Legs gym tarde','red']],
+    blocks: [
+      {t:'6:00',ti:'Agua + colágeno + creatina',s:'',c:'blue'},
+      {t:'6:05',ti:'TTB — Temprano Te Buscaré',s:'~55 min.',c:'purple'},
+      {t:'6:40',ti:'Traslado a tochito',s:'5 min — a lado de tu casa.',c:'gray'},
+      {t:'6:45',ti:'Tochito — Agilidad',s:'Calentamiento 8 min + sesión + enfriamiento. ~42 min total.',c:'blue'},
+      {t:'7:30',ti:'Regreso + Ducha contraste',s:'Champú + jabón. Contraste 2 rondas. Fría al final.',c:'blue'},
+      {t:'7:55',ti:'Skincare mañana',s:'Limpiador · hidratante + SPF · drenaje linfático.',c:'gray'},
+      {t:'8:10',ti:'Desayuno',s:'Alto en proteína. Reponer energía del tochito.',c:'amber'},
+      {t:'8:40',ti:'Trabajo — bloque 1',s:'El más productivo de la semana.',c:'blue'},
+      {t:'1:00',ti:'Comida',s:'Carbos permitidos hoy. Día de mayor gasto.',c:'amber'},
+      {t:'1:30',ti:'Bulletproof knees',s:'Backwards walk + rutina completa.',c:'green'},
+      {t:'2:00',ti:'Trabajo — bloque 2',s:'',c:'blue'},
+      {t:'5:00',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'5:15',ti:'Gym — Legs cuádriceps',s:'Calentamiento → Sillón masaje → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'6:30',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'7:15',ti:'Ducha rápida contraste',s:'Sin champú. Jabón + contraste 2 rondas. Fría al final.',c:'blue'},
+      {t:'7:35',ti:'Cena',s:'Ligera. Proteína + ensalada.',c:'amber'},
+      {t:'8:00',ti:'Lectura',s:'20-30 min.',c:'purple'},
+      {t:'8:30',ti:'Oración nocturna',s:'20-30 min.',c:'purple'},
+      {t:'9:00',ti:'Skincare noche',s:'Limpiador · hidratante · minoxidil · manos · tapes.',c:'gray'},
+      {t:'9:15',ti:'Dormir',s:'Deja ropa de tochito lista para jueves.',c:'gray'},
+    ]
+  },
+  {
+    name: 'JUEVES', title: 'Velocidad + Push', sub: 'Sprints mañana · Gym tarde · Piano',
+    pills: [['Tochito velocidad','blue'],['Push gym tarde','red'],['Piano noche','purple']],
+    blocks: [
+      {t:'6:00',ti:'Agua + colágeno + creatina',s:'',c:'blue'},
+      {t:'6:05',ti:'TTB — Temprano Te Buscaré',s:'~55 min.',c:'purple'},
+      {t:'6:40',ti:'Traslado a tochito',s:'5 min.',c:'gray'},
+      {t:'6:45',ti:'Tochito — Velocidad',s:'Calentamiento 8 min + sesión + enfriamiento. ~42 min.',c:'blue'},
+      {t:'7:30',ti:'Regreso + Ducha contraste',s:'Champú + jabón. Contraste 2 rondas. Fría al final.',c:'blue'},
+      {t:'7:55',ti:'Skincare mañana + Facial gym',s:'Limpiador · hidratante + SPF · drenaje · facial gym.',c:'gray'},
+      {t:'8:10',ti:'Desayuno',s:'Carbos incluidos hoy. Reponer glucógeno post-sprint.',c:'amber'},
+      {t:'8:40',ti:'Trabajo — bloque 1',s:'',c:'blue'},
+      {t:'1:00',ti:'Comida',s:'Completa. Día de mayor gasto energético.',c:'amber'},
+      {t:'1:30',ti:'Bulletproof knees',s:'Backwards walk + rutina completa.',c:'green'},
+      {t:'2:00',ti:'Trabajo — bloque 2',s:'',c:'blue'},
+      {t:'5:00',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'5:15',ti:'Gym — Push',s:'Calentamiento → Sillón masaje → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'6:30',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'7:15',ti:'Ducha rápida contraste',s:'Sin champú. Jabón + contraste 2 rondas. Fría al final.',c:'blue'},
+      {t:'7:35',ti:'Skincare noche + Exfoliación',s:'Epoch. Limpiador · hidratante · minoxidil · manos · tapes.',c:'gray'},
+      {t:'7:50',ti:'Cena',s:'Proteína + verduras.',c:'amber'},
+      {t:'8:20',ti:'Piano / teoría musical',s:'30-45 min.',c:'purple'},
+      {t:'9:05',ti:'Lectura',s:'20 min.',c:'purple'},
+      {t:'9:25',ti:'Oración nocturna',s:'20-30 min.',c:'purple'},
+      {t:'10:00',ti:'Dormir',s:'Deja ropa de gym lista para viernes.',c:'gray'},
+    ]
+  },
+  {
+    name: 'VIERNES', title: 'Pull · Iglesia', sub: 'Gym mañana · Aviva 6:30pm',
+    pills: [['Gym mañana','red'],['Pull body','red'],['Iglesia 6:30','purple'],['Sin tochito','gray']],
+    blocks: [
+      {t:'6:00',ti:'Agua + colágeno + creatina',s:'',c:'blue'},
+      {t:'6:05',ti:'TTB — Temprano Te Buscaré',s:'~55 min.',c:'purple'},
+      {t:'7:00',ti:'Tu tiempo con Dios',s:'15 min.',c:'purple'},
+      {t:'7:15',ti:'Movilidad + Desayuno',s:'12 movimientos · 7 min. Proteína primero.',c:'amber'},
+      {t:'7:45',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'8:00',ti:'Gym — Pull',s:'Calentamiento → Sillón masaje → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'9:15',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'9:45',ti:'Traslado + Ducha contraste',s:'Champú + jabón. Contraste 3 rondas. Fría al final.',c:'blue'},
+      {t:'10:20',ti:'Skincare mañana + Exfoliación',s:'Epoch. Hidratante + SPF · drenaje linfático.',c:'gray'},
+      {t:'10:35',ti:'Trabajo — bloque 1',s:'Cierre de proyectos de la semana.',c:'blue'},
+      {t:'1:00',ti:'Comida',s:'Proteína primero.',c:'amber'},
+      {t:'1:30',ti:'Bulletproof knees',s:'Backwards walk + rutina completa.',c:'green'},
+      {t:'2:00',ti:'Trabajo — bloque 2',s:'Cierre semana. Revisar metas y aplicaciones.',c:'blue'},
+      {t:'5:30',ti:'Preparación iglesia',s:'Cambiarte. Salida a las 6pm.',c:'gray'},
+      {t:'6:30',ti:'Iglesia — Aviva',s:'Montar 6:30. Servicio 7:30-9:30pm.',c:'purple'},
+      {t:'9:45',ti:'Skincare noche',s:'Limpiador · hidratante · minoxidil · manos · tapes.',c:'gray'},
+      {t:'10:00',ti:'Oración nocturna',s:'15 min. Cierre del día y la semana.',c:'purple'},
+      {t:'10:30',ti:'Dormir',s:'Deja ropa de gym lista para sábado.',c:'gray'},
+    ]
+  },
+  {
+    name: 'SÁBADO', title: 'Full Body + Descanso', sub: 'TTB · Gym opcional · Dermaroller',
+    pills: [['Gym opcional','gray'],['Full body','red'],['Dermaroller noche','purple'],['Facial gym','gray']],
+    blocks: [
+      {t:'6:00',ti:'Agua + colágeno + creatina',s:'',c:'blue'},
+      {t:'6:05',ti:'TTB — Temprano Te Buscaré',s:'Termina ~7am.',c:'purple'},
+      {t:'7:10',ti:'Traslado al gym',s:'10-15 min.',c:'gray'},
+      {t:'7:25',ti:'Gym — Full body (opcional)',s:'Calentamiento → Sillón masaje → Rutina → Estiramiento en gym.',c:'red'},
+      {t:'8:25',ti:'Incline walk',s:'Speed 3 · Incline 12 · 25 min.',c:'red'},
+      {t:'8:55',ti:'Traslado + Ducha contraste',s:'Champú + jabón. Contraste 3 rondas. Fría al final.',c:'blue'},
+      {t:'9:30',ti:'Skincare mañana + Facial gym',s:'Limpiador · hidratante + SPF · drenaje · facial gym.',c:'gray'},
+      {t:'9:45',ti:'Desayuno con calma',s:'Más flexible hoy. Dentro del plan.',c:'amber'},
+      {t:'10:30',ti:'Tiempo libre / trabajo / social',s:'Familia, amigos, trabajo extra.',c:'gray'},
+      {t:'1:00',ti:'Comida',s:'La más libre de la semana. Sin refresco.',c:'amber'},
+      {t:'2:30',ti:'Bulletproof knees',s:'Backwards walk + rutina completa.',c:'green'},
+      {t:'3:00',ti:'Descanso / siesta',s:'Recovery activo.',c:'gray'},
+      {t:'7:00',ti:'Cena',s:'Normal. Sin excesos.',c:'amber'},
+      {t:'8:30',ti:'Lavar ropa',s:'Carga de ropa de entreno jue-vie + casual.',c:'gray'},
+      {t:'9:00',ti:'Skincare noche + Dermaroller',s:'Limpiador → dermaroller → 20 min → minoxidil → sin hidratante.',c:'gray'},
+      {t:'9:30',ti:'Oración nocturna',s:'15-20 min.',c:'purple'},
+      {t:'11:00',ti:'Dormir',s:'',c:'gray'},
+    ]
+  },
+  {
+    name: 'DOMINGO', title: 'Descanso + Iglesia', sub: 'Cero gym · Knees noche · Reset',
+    pills: [['Sin gym','gray'],['Iglesia','purple'],['Knees noche','green'],['Reset semanal','blue']],
+    blocks: [
+      {t:'7:15',ti:'Despertar — Agua + suplementos',s:'Alarma 7:15 todos los domingos.',c:'blue'},
+      {t:'7:25',ti:'Devocional + Oración extendida',s:'Más tiempo hoy. Adoración, buscar su presencia. Sin prisa.',c:'purple'},
+      {t:'8:00',ti:'Desayuno + preparación iglesia',s:'',c:'amber'},
+      {t:'8:30',ti:'Iglesia — Aviva',s:'Editor: 8:30am. Producción/descanso: 9:30am. Reunión 10:30-2pm.',c:'purple'},
+      {t:'2:00',ti:'Comida con familia',s:'Más libre. Disfruta. Sin refresco.',c:'amber'},
+      {t:'3:30',ti:'Tiempo libre / descanso',s:'Lo que el día traiga.',c:'gray'},
+      {t:'5:30',ti:'Lavar ropa',s:'Sábanas + toallas — reset semanal completo.',c:'gray'},
+      {t:'6:00',ti:'Lectura',s:'30-40 min. Libro físico.',c:'purple'},
+      {t:'7:00',ti:'Cena',s:'Normal.',c:'amber'},
+      {t:'8:00',ti:'Preparación semana siguiente',s:'Agenda, metas, ropa de gym del lunes lista.',c:'blue'},
+      {t:'8:30',ti:'Bulletproof knees',s:'El único entreno del día. Backwards walk + rutina.',c:'green'},
+      {t:'9:00',ti:'Skincare noche',s:'Limpiador · hidratante · minoxidil · manos · tapes.',c:'gray'},
+      {t:'9:15',ti:'Oración nocturna',s:'20 min. Entregar la semana que viene a Dios.',c:'purple'},
+      {t:'9:45',ti:'Dormir',s:'Mañana es lunes. El día más pesado. Entra descansado.',c:'gray'},
+    ]
+  },
+];
+
+const GYM_ROUTINES = {
+  lunes: {
+    name: 'Lower Body', objetivo: 'Cuádriceps, isquiotibiales, glúteo, gemelos, aductores',
+    calentamiento: ['Caminata cinta vel.4, incl.2 — 3 min','Círculos de cadera — 10 cada lado','Sentadilla corporal lenta — 2×10','Estiramiento dinámico isquios — 10 cada lado'],
+    ejercicios: [
+      {n:'Leg Press horizontal',s:'4',r:'12',d:'90s',nota:'Pies al ancho de hombros, baja a 90°'},
+      {n:'Leg Extension',s:'4',r:'15',d:'60s',nota:'Control en la bajada, aprieta el quad arriba'},
+      {n:'Leg Curl acostado',s:'4',r:'12',d:'60s',nota:'Sin rebotes, movimiento controlado'},
+      {n:'Hip Abduction',s:'3',r:'15',d:'60s',nota:'Glúteo medio — clave para rodilla'},
+      {n:'Hip Adduction',s:'3',r:'15',d:'60s',nota:'Muslo interno y estabilidad de cadera'},
+      {n:'Calf raise',s:'4',r:'20',d:'45s',nota:'Baja talón completamente, sube lento'},
+    ],
+    enfriamiento: ['Cuádriceps de pie — 45s cada lado','Isquiotibiales sentado — 45s cada lado','Cadera figura 4 en piso — 45s cada lado','Gemelo contra la pared — 30s cada lado','Respiración profunda — 1 min'],
+  },
+  martes: {
+    name: 'Upper Body', objetivo: 'Pecho, hombros, bíceps, tríceps — anchura y definición',
+    calentamiento: ['Rotaciones de hombro adelante y atrás — 15','Círculos de brazo grandes — 10 cada lado','Chest press peso mínimo — 2×15','Apertura dinámica de pecho — 10 reps'],
+    ejercicios: [
+      {n:'Chest Press',s:'4',r:'12',d:'90s',nota:'Pecho afuera, no encorves hombros'},
+      {n:'Pec Fly',s:'3',r:'15',d:'60s',nota:'Abre bien, siente el pecho en el estiramiento'},
+      {n:'Shoulder Press',s:'4',r:'12',d:'90s',nota:'No bloquees codos arriba, mantén tensión'},
+      {n:'Rear Delt',s:'3',r:'15',d:'60s',nota:'Deltoides posterior — hombros anchos'},
+      {n:'Bícep Curl',s:'4',r:'12',d:'60s',nota:'Codo fijo, no balancees'},
+      {n:'Trícep Press',s:'4',r:'12',d:'60s',nota:'Codo pegado al cuerpo, extensión completa'},
+    ],
+    enfriamiento: ['Pecho en marco — 45s','Hombro cruzando brazo — 45s cada lado','Tríceps detrás de cabeza — 45s cada lado','Bíceps contra pared — 30s cada lado','Respiración profunda — 1 min'],
+  },
+  miercoles: {
+    name: 'Legs — Cuádriceps Focus', objetivo: 'El día más importante para la rodilla operada',
+    calentamiento: ['Caminata cinta vel.4, incl.2 — 3 min','Círculos de tobillo — 10 cada lado','Estocadas dinámicas — 8 cada lado','Sentadilla profunda y lenta — 2×8'],
+    ejercicios: [
+      {n:'Leg Extension',s:'4',r:'15',d:'60s',nota:'Cuádriceps aislado — clave para rodilla operada'},
+      {n:'Linear Hack Squat',s:'4',r:'10',d:'90s',nota:'Profundidad controlada, rodillas hacia afuera'},
+      {n:'Hip Thrust',s:'4',r:'12',d:'90s',nota:'Aprieta glúteo arriba, pausa 1 segundo'},
+      {n:'Seated Leg Curl',s:'4',r:'12',d:'60s',nota:'Isquios sentado — ángulo diferente al lunes'},
+      {n:'Calf press sentado',s:'4',r:'20',d:'45s',nota:'Sóleo profundo — soporte de rodilla'},
+    ],
+    enfriamiento: ['Cuádriceps de pie — 45s cada lado','Glúteo en piso — 45s cada lado','Pantorrilla contra pared — 30s cada lado','Movilidad tobillo circular — 10 cada lado','Respiración profunda — 1 min'],
+  },
+  jueves: {
+    name: 'Push', objetivo: 'Pecho superior, deltoides, tríceps — fuerza de lanzamiento QB',
+    calentamiento: ['Rotaciones de hombro con brazo extendido — 15','Shoulder press peso mínimo — 2×15','Estiramiento dinámico de pecho — 10 reps','Círculos de muñeca — 10 cada dirección'],
+    ejercicios: [
+      {n:'Chest Press',s:'4',r:'10',d:'90s',nota:'Más peso que martes — fuerza pura'},
+      {n:'Pec Fly',s:'3',r:'12',d:'60s',nota:'Apertura completa — pecho completo'},
+      {n:'Shoulder Press',s:'4',r:'10',d:'90s',nota:'Fuerza de hombro — base del lanzamiento QB'},
+      {n:'Lateral Raise cable',s:'3',r:'15',d:'60s',nota:'Deltoides lateral — hombros anchos'},
+      {n:'Trícep Pushdown',s:'4',r:'15',d:'60s',nota:'Extensión completa — fuerza de empuje'},
+      {n:'Face Pull cable',s:'3',r:'15',d:'60s',nota:'Hombro posterior — salud del manguito'},
+    ],
+    enfriamiento: ['Pecho en marco — 45s','Hombro cruzando brazo — 45s cada lado','Tríceps detrás de cabeza — 45s cada lado','Bíceps contra pared — 30s cada lado','Respiración profunda — 1 min'],
+  },
+  viernes: {
+    name: 'Pull', objetivo: 'Espalda ancha, trapecio, bíceps, deltoides posterior',
+    calentamiento: ['Rotaciones de hombro hacia atrás — 15 reps','Pulldown peso mínimo — 2×15','Espalda colgándote de la máquina — 30s','Círculos de muñeca — 10 cada dirección'],
+    ejercicios: [
+      {n:'Lat Pulldown',s:'4',r:'12',d:'90s',nota:'Agarre ancho, lleva barra al pecho'},
+      {n:'Seated Row',s:'4',r:'12',d:'90s',nota:'Codos pegados, aprieta escápulas atrás'},
+      {n:'Face Pull cable',s:'4',r:'15',d:'60s',nota:'Trapecio y manguito rotador'},
+      {n:'Rear Delt',s:'3',r:'15',d:'60s',nota:'Deltoides posterior — hombro completo'},
+      {n:'Bícep Curl',s:'4',r:'12',d:'60s',nota:'Fuerza de agarre — clave para WR'},
+      {n:'Chin asistido',s:'3',r:'8',d:'90s',nota:'Dominadas asistidas — espalda completa'},
+    ],
+    enfriamiento: ['Espalda abrazando rodillas en piso — 45s','Dorsal con brazo en máquina — 30s cada lado','Bíceps contra pared — 30s cada lado','Trapecio jalando cabeza lateral — 30s cada lado','Respiración profunda — 1 min'],
+  },
+  sabado: {
+    name: 'Full Body (opcional)', objetivo: 'Mantenimiento. 5 días de gym esta semana = esto es bonus',
+    calentamiento: ['Movilidad general — hombros, cadera, tobillos','Caminata cinta — 3 min'],
+    ejercicios: [
+      {n:'Leg Press',s:'3',r:'12',d:'90s',nota:''},
+      {n:'Chest Press',s:'3',r:'12',d:'90s',nota:''},
+      {n:'Lat Pulldown',s:'3',r:'12',d:'90s',nota:''},
+      {n:'Hip Thrust',s:'3',r:'12',d:'90s',nota:''},
+      {n:'Shoulder Press',s:'3',r:'12',d:'90s',nota:''},
+      {n:'Calf raise',s:'3',r:'20',d:'45s',nota:''},
+    ],
+    enfriamiento: ['Estiramiento general 5 min'],
+  },
+};
+
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+
+let state = {
+  days: {}, // { 'YYYY-MM-DD': { checks: {}, gym: false, weight: null } }
+  weights: [], // [{ date, value }]
+  claridad: {}, // { dayNum: true/false }
+};
+
+let activeScreen = 'hoy';
+let activeRutTab = 'gym';
+let activeDayTab = 0;
+let activeMasTab = 'nutricion';
+let isOnline = false;
+
+// ─── FIREBASE SYNC ────────────────────────────────────────────────────────────
+
+async function loadData() {
+  try {
+    const docRef = doc(db, 'reto90', 'luis');
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      state = { ...state, ...snap.data() };
+    }
+    isOnline = true;
+    updateSyncUI(true);
+
+    // Listen for real-time changes
+    onSnapshot(docRef, (s) => {
+      if (s.exists()) {
+        state = { ...state, ...s.data() };
+        refreshCurrentScreen();
+      }
+    });
+  } catch(e) {
+    console.log('Offline mode:', e);
+    isOnline = false;
+    updateSyncUI(false);
+  }
+  
+  hideLoading();
+  initApp();
+}
+
+async function saveData() {
+  try {
+    await setDoc(doc(db, 'reto90', 'luis'), state, { merge: true });
+    updateSyncUI(true);
+  } catch(e) {
+    updateSyncUI(false);
+  }
+}
+
+function updateSyncUI(online) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  if (dot) {
+    dot.className = 'sync-dot' + (online ? '' : ' offline');
+    label.textContent = online ? 'sincronizado' : 'sin conexión';
+  }
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getDayNum() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const start = new Date('2026-06-15T00:00:00');
+  start.setHours(0,0,0,0);
+  const diff = Math.floor((now - start) / 86400000) + 1;
+  if (diff < 1) return 0;
+  return Math.min(diff, TOTAL_DAYS);
+}
+
+function getTodayData() {
+  const t = today();
+  if (!state.days) state.days = {};
+  if (!state.days[t]) state.days[t] = { checks: {}, gym: false };
+  return state.days[t];
+}
+
+function getDayOfWeek() {
+  return new Date().getDay(); // 0=Sun, 1=Mon, ...
+}
+
+function dayIndexForSchedule(jsDay) {
+  // 1=Mon=0, 2=Tue=1, 3=Wed=2, 4=Thu=3, 5=Fri=4, 6=Sat=5, 0=Sun=6
+  return jsDay === 0 ? 6 : jsDay - 1;
+}
+
+function getStreak() {
+  if (!state.days) return 0;
+  let streak = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  for (let i = 0; i < 90; i++) {
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dayData = state.days[key];
+    if (!dayData) { d.setDate(d.getDate() - 1); continue; }
+    const checks = dayData.checks || {};
+    const done = Object.values(checks).filter(Boolean).length;
+    if (done >= 1) { // Count any day with at least 1 check
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+function getPerfectDays() {
+  if (!state.days) return 0;
+  return Object.values(state.days).filter(d => {
+    const checks = d.checks || {};
+    return Object.values(checks).filter(Boolean).length === INAMOVIBLES.length;
+  }).length;
+}
+
+function getCheckedToday() {
+  const td = getTodayData();
+  return Object.values(td.checks || {}).filter(Boolean).length;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+function hideLoading() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+}
+
+function initApp() {
+  updateHoyScreen();
+  renderRutinas();
+  renderHorario(0);
+  renderMas('nutricion');
+  renderProgreso();
+  
+  // Set active day tab to today
+  const todayDayIdx = dayIndexForSchedule(getDayOfWeek());
+  activeDayTab = todayDayIdx;
+  renderHorario(todayDayIdx);
+  updateHorarioTabs(todayDayIdx);
+}
+
+function refreshCurrentScreen() {
+  if (activeScreen === 'hoy') updateHoyScreen();
+  if (activeScreen === 'progreso') renderProgreso();
+}
+
+// ─── SCREEN: HOY ─────────────────────────────────────────────────────────────
+
+function updateHoyScreen() {
+  const dayNum = getDayNum();
+  const jsDay = getDayOfWeek();
+  const dayIdx = dayIndexForSchedule(jsDay);
+  const dayData = DAYS_DATA[dayIdx];
+
+  // Header
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('greetTitle').textContent = greet + ', Luis';
+
+  const dateStr = new Date().toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('todayDate').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const startDate15 = new Date('2026-06-15T00:00:00');
+  startDate15.setHours(0,0,0,0);
+  const nowForCount = new Date(); nowForCount.setHours(0,0,0,0);
+  const daysToStart = Math.ceil((startDate15 - nowForCount) / 86400000);
+  document.getElementById('dayCounter').textContent = dayNum > 0 ? `Día ${dayNum} / 90` : (daysToStart > 0 ? `Inicia en ${daysToStart}d` : 'Día 1');
+
+  // Hero
+  const heroBanner = document.getElementById('heroBanner');
+  heroBanner.setAttribute('data-day', dayNum > 0 ? dayNum : daysToStart);
+  document.getElementById('heroDay').textContent = dayNum > 0 ? dayData.name : 'PRE-RETO';
+  document.getElementById('heroTitle').textContent = dayNum > 0 ? dayData.title : (daysToStart > 0 ? `Faltan ${daysToStart} días para el Día 1` : 'Lunes 15 Junio — ¡Arranca hoy!');
+  const pillsEl = document.getElementById('heroPills');
+  pillsEl.innerHTML = dayNum > 0
+    ? dayData.pills.map(([t,c]) => `<span class="pill pill-${c}">${t}</span>`).join('')
+    : '<span class="pill pill-red">Lunes 15 Junio</span><span class="pill pill-blue">Día 1 oficial</span><span class="pill pill-purple">Dios primero</span>';
+
+  // Stats
+  document.getElementById('daysNum').textContent = dayNum;
+  const pct = (dayNum / TOTAL_DAYS * 100).toFixed(0);
+  document.getElementById('retoProg').style.width = pct + '%';
+  document.getElementById('retoProgLabel').textContent = `${dayNum} / ${TOTAL_DAYS} días`;
+  document.getElementById('streakNum').textContent = getStreak();
+  document.getElementById('perfectDays').textContent = `${getPerfectDays()} días perfectos`;
+
+  // Checklist
+  const td = getTodayData();
+  const cl = document.getElementById('checklistHoy');
+  cl.innerHTML = INAMOVIBLES.map(item => {
+    const done = td.checks && td.checks[item.id];
+    return `<div class="check-item ${done?'done':''}" onclick="toggleCheck('${item.id}')">
+      <div class="check-box">${done ? '✓' : ''}</div>
+      <div>
+        <div class="check-text">${item.icon} ${item.text}</div>
+        <div class="check-sub">${item.sub}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Rutina del dia
+  document.getElementById('rutinaLabel').textContent = `Rutina de ${dayData.name.charAt(0) + dayData.name.slice(1).toLowerCase()}`;
+  const gymKeys = ['lunes','martes','miercoles','jueves','viernes','sabado'];
+  const gymKey = gymKeys[dayIdx];
+  const gym = GYM_ROUTINES[gymKey];
+  const rutinaEl = document.getElementById('rutinaHoy');
+  
+  if (gym) {
+    rutinaEl.innerHTML = `
+      <div class="card">
+        <div style="font-size:14px; font-weight:700; margin-bottom:4px;">${gym.name}</div>
+        <div style="font-size:11px; color:var(--text2); margin-bottom:12px;">${gym.objetivo}</div>
+        <table class="ex-table">
+          <thead><tr><th>Ejercicio</th><th>S</th><th>R</th><th>Des</th></tr></thead>
+          <tbody>
+            ${gym.ejercicios.map(e => `<tr>
+              <td><div class="ex-name">${e.n}</div>${e.nota?`<div class="ex-note">${e.nota}</div>`:''}</td>
+              <td>${e.s}</td><td>${e.r}</td><td>${e.d}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top:12px; font-size:11px; color:var(--red); font-weight:600;">⬆ INCLINE WALK al terminar — Speed 3 · Incline 12 · 25 min</div>
+      </div>`;
+  } else {
+    rutinaEl.innerHTML = `<div class="alert alert-green">🙌 Descanso activo. Caminata ligera. Solo Bulletproof Knees hoy.</div>`;
+  }
+
+  // Weight input
+  if (td.weight) {
+    document.getElementById('weightInput').value = td.weight;
+  }
+}
+
+window.toggleCheck = function(id) {
+  const td = getTodayData();
+  if (!td.checks) td.checks = {};
+  td.checks[id] = !td.checks[id];
+  saveData();
+  updateHoyScreen();
+  renderProgreso();
+}
+
+window.saveWeight = function() {
+  const val = parseFloat(document.getElementById('weightInput').value);
+  if (isNaN(val) || val < 40 || val > 300) return;
+  const td = getTodayData();
+  td.weight = val;
+  if (!state.weights) state.weights = [];
+  const t = today();
+  const existing = state.weights.findIndex(w => w.date === t);
+  if (existing >= 0) state.weights[existing].value = val;
+  else state.weights.push({ date: t, value: val });
+  saveData();
+  renderProgreso();
+  document.querySelector('#screen-hoy .card input').style.borderColor = 'var(--green)';
+  setTimeout(() => document.querySelector('#screen-hoy .card input').style.borderColor = '', 1500);
+}
+
+// ─── SCREEN: RUTINAS ─────────────────────────────────────────────────────────
+
+function renderRutinas() {
+  renderRutTab(activeRutTab);
+}
+
+window.switchRutTab = function(tab) {
+  activeRutTab = tab;
+  document.querySelectorAll('#rutinasTabs .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['gym','tocho','knees','partido','cardio'][i] === tab);
+  });
+  renderRutTab(tab);
+}
+
+function renderRutTab(tab) {
+  const el = document.getElementById('rutinasContent');
+  if (tab === 'gym') {
+    const days = [
+      {key:'lunes',label:'LUNES'},
+      {key:'martes',label:'MARTES'},
+      {key:'miercoles',label:'MIÉRCOLES'},
+      {key:'jueves',label:'JUEVES'},
+      {key:'viernes',label:'VIERNES'},
+      {key:'sabado',label:'SÁBADO'},
+    ];
+    el.innerHTML = days.map(d => {
+      const g = GYM_ROUTINES[d.key];
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <div style="background:var(--red); color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:20px;">${d.label}</div>
+            <div>
+              <div style="font-size:14px; font-weight:700;">${g.name}</div>
+              <div style="font-size:11px; color:var(--text2);">${g.objetivo}</div>
+            </div>
+          </div>
+          
+          <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Calentamiento</div>
+          ${g.calentamiento.map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+          
+          <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin:12px 0 6px;">Rutina principal</div>
+          <table class="ex-table">
+            <thead><tr><th>Ejercicio</th><th>S</th><th>R</th><th>Des</th></tr></thead>
+            <tbody>
+              ${g.ejercicios.map(e => `<tr>
+                <td><div class="ex-name">${e.n}</div>${e.nota?`<div class="ex-note">${e.nota}</div>`:''}</td>
+                <td>${e.s}</td><td>${e.r}</td><td>${e.d}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          
+          <div style="margin:12px 0 8px; background:rgba(226,75,74,0.08); border-radius:8px; padding:10px 12px; font-size:12px; color:var(--red); font-weight:600;">
+            ⬆ Incline walk — Speed 3 · Incline 12 · 25 min
+          </div>
+          
+          <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Enfriamiento (en gym)</div>
+          ${g.enfriamiento.map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+        </div>`;
+    }).join('');
+  }
+  else if (tab === 'tocho') {
+    el.innerHTML = `
+      <div class="alert alert-gray" style="margin-bottom:12px;">🏈 Tochito: <b>Miércoles (Agilidad)</b> y <b>Jueves (Velocidad)</b> — Mañana temprano · 42 min máx</div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="background:#378ADD; color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:20px;">MIÉRCOLES</div>
+          <div style="font-size:14px; font-weight:700;">Agilidad</div>
+        </div>
+        <div style="font-size:11px; color:var(--text2); margin-bottom:10px;">Cortes · Salto · Movimiento de pies QB · Agarre WR</div>
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin-bottom:6px;">Calentamiento (8 min)</div>
+        ${['Trote suave — 2 min','A-skips — 2×20m (30s descanso)','High knees — 2×20m (30s descanso)','Leg swings frontales — 10 cada lado','Leg swings laterales — 10 cada lado','Estiramiento dinámico de cadera — 8 cada lado'].map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin:12px 0 6px;">Sesión principal</div>
+        ${[
+          ['Carioca','4×20m','30s','Caderas sueltas. Cruza pie por delante y atrás.'],
+          ['5-10-5 drill','6 reps (3 c/lado)','45s','Centro → 4.5m derecha toca → 9m izq toca → regresa.'],
+          ['L-drill','6 reps (3 c/lado)','45s','3 conos en L. Corre, regresa, dobla. Alterna lado.'],
+          ['Broad jump','4 series × 5','60s/10s','Salto horizontal máximo. Aterriza controlado.'],
+          ['Salto vertical','4 series × 5','60s/10s','Flexión rápida, salto máximo. 20 saltos total.'],
+          ['Ladder drills (3 ejercicios)','3×3 pasadas','30s','Two in two out · Icky shuffle · Single leg hop.'],
+          ['Resistencia de agarre','3×30s','30s','Pelota de tenis. Aprieta al máximo. Alterna mano.'],
+        ].map(([n,r,d,nota]) => `
+          <div style="border-bottom:1px solid var(--border); padding:8px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:13px; font-weight:600;">${n}</div>
+              <div style="font-size:11px; color:var(--red); font-weight:600;">${r}</div>
+            </div>
+            <div style="font-size:11px; color:var(--text2); margin-top:2px;">Descanso: ${d} — ${nota}</div>
+          </div>`).join('')}
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin:12px 0 6px;">Enfriamiento (5 min)</div>
+        ${['Trote muy suave — 2 min','Cadera figura 4 en piso — 30s cada lado','Isquiotibiales sentado — 30s cada lado','Respiración profunda — 1 min'].map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="background:#378ADD; color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:20px;">JUEVES</div>
+          <div style="font-size:14px; font-weight:700;">Velocidad</div>
+        </div>
+        <div style="font-size:11px; color:var(--text2); margin-bottom:10px;">Sprints · Rutas WR · Movimiento QB · Reacción</div>
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin-bottom:6px;">Calentamiento (8 min)</div>
+        ${['Trote suave — 2 min','A-skips — 2×20m','Butt kicks — 2×20m','Leg swings frontales y laterales — 10 cada lado','Estiramiento dinámico isquios — 8 cada lado'].map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin:12px 0 6px;">Sesión principal</div>
+        ${[
+          ['Sprint 20m','8 reps','45s','Aceleración máxima desde el primer paso.'],
+          ['Sprint 40m','5 reps','90s','Velocidad máxima. Mantén hasta pasar los 40m.'],
+          ['Ladder QB (3 ejercicios)','3×3 pasadas','30s','Two in two out · Icky shuffle · Crossover step.'],
+          ['Reaction drills','5 reps c/variante','30s','Explota hacia la dirección. Solo: pelota a pared.'],
+          ['Route running WR','20 rutas (5 de cada)','20s','Slant · Out · Post · Comeback.'],
+          ['Anti-strip drill','10 reps','20s','Agarra fuerte. Alguien intenta quitar o sostén 5s.'],
+        ].map(([n,r,d,nota]) => `
+          <div style="border-bottom:1px solid var(--border); padding:8px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:13px; font-weight:600;">${n}</div>
+              <div style="font-size:11px; color:var(--red); font-weight:600;">${r}</div>
+            </div>
+            <div style="font-size:11px; color:var(--text2); margin-top:2px;">Descanso: ${d} — ${nota}</div>
+          </div>`).join('')}
+        
+        <div style="font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; margin:12px 0 6px;">Enfriamiento (5 min)</div>
+        ${['Trote muy suave — 2 min','Isquiotibiales sentado — 30s cada lado','Cadera figura 4 — 30s cada lado','Respiración profunda — 1 min'].map(c => `<div style="font-size:12px; color:var(--text2); padding:3px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>`;
+  }
+  else if (tab === 'knees') {
+    el.innerHTML = `
+      <div class="alert alert-red">🦵 DIARIA SIN FALTA. Pierna operada: empieza siempre por ese lado. Dolor articular = PARA. Dolor muscular = normal, continúa.</div>
+      
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Fase 1 — Activación (5 min)</div>
+        <div style="font-size:13px; font-weight:600;">Backwards walk</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:4px;">5 min continuo en lugar plano. Sin banda, sin equipo. Camina hacia atrás. Activa cuádriceps, mejora circulación en rodilla.</div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Fase 2 — Fuerza y control (15 min)</div>
+        ${[
+          ['Quad sets isométricos','3','30s c/pierna','No','Sentado, pierna extendida, aprieta quad empujando corva al piso.'],
+          ['Terminal knee extension','3','15 reps c/lado','Opcional','Sentado al borde de silla, extiende y aprieta quad 2s.'],
+          ['Wall sit + calf raises','3','15 reps','No','Sentado en pared 90°, sube y baja talones lento.'],
+          ['Tibialis raise en pared','3','15 reps','No','Recargado en pared, talones en piso, punta del pie sube y baja.'],
+          ['Knee pulses','3','12 reps c/pierna','No','Pie levantado, pulsos cortos extendiendo y flexionando.'],
+          ['Hamstring curl','3','8 reps c/pierna','Opcional','Boca abajo, flexiona rodilla jalando talón al glúteo.'],
+          ['Soleus raise','3','10 reps c/pierna','No','De pie rodilla doblada, eleva talón lento.'],
+          ['Movilidad de tobillo','3','10 reps c/lado','No','Rodilla adelante sin levantar talón. Círculo adentro/afuera.'],
+        ].map(([n,s,r,banda,desc]) => `
+          <div style="border-bottom:1px solid var(--border); padding:9px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="font-size:13px; font-weight:600; flex:1;">${n}</div>
+              <div style="display:flex; gap:8px; flex-shrink:0;">
+                <span style="font-size:10px; background:var(--bg4); padding:2px 7px; border-radius:10px; color:var(--text2);">${s}×${r}</span>
+                ${banda !== 'No' ? `<span style="font-size:10px; background:var(--red-dim); padding:2px 7px; border-radius:10px; color:var(--red);">banda</span>` : ''}
+              </div>
+            </div>
+            <div style="font-size:11px; color:var(--text2); margin-top:3px;">${desc}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Fase 3 — Estiramiento final (3 min)</div>
+        ${['Cuádriceps de pie — 30s cada lado','Isquiotibiales sentado — 30s cada lado','Pantorrilla contra pared — 30s cada lado'].map(c => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>`;
+  }
+  else if (tab === 'partido') {
+    el.innerHTML = `
+      <div class="alert alert-gray">🏈 Lunes ~11pm — Transtorna2 · Liga MVP Flag Football</div>
+      
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Antes del partido — en casa</div>
+        ${['Cena ligera 2-3 horas antes: proteína + carbos simples.','500ml agua en la hora previa.','Creatina si no la tomaste en el día.','Ropa de tocho lista desde antes.'].map(c => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Calentamiento en cancha (12 min)</div>
+        ${['Trote suave — 2 min','A-skips — 1×20m · High knees — 1×20m','Leg swings frontales y laterales — 8 cada lado','Círculos de brazo adelante y atrás — 15 reps','Rotaciones de hombro con codo doblado — 10 cada lado','Apertura dinámica de pecho — 10 reps · Círculos de muñeca','Drop back QB 3 pasos × 5 · Drop back 5 pasos × 5','Anti-cintas: giro + escapada lateral — 3 reps cada lado','4 rutas cortas: slant, out, comeback, post','8-10 pases progresivos · 5 recepciones progresivas'].map(c => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Estiramiento post partido (8 min en cancha)</div>
+        ${['Cuádriceps de pie — 45s cada lado','Isquiotibiales sentado en el pasto — 45s cada lado','Cadera figura 4 en el pasto — 45s cada lado','Pantorrilla contra pared — 30s cada lado','Hombro cruzando brazo — 30s cada lado','Tríceps detrás de cabeza — 30s cada lado','Bíceps con brazo contra pared — 30s cada lado','Respiración profunda — 1 min'].map(c => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">• ${c}</div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px; font-weight:700; margin-bottom:8px;">Tacos post partido 🌮</div>
+        <div class="alert-green alert" style="margin-bottom:0;">Maíz · pollo o bistec · sin crema · máx 3-4 · <b>AGUA o mineral — sin refresco sin negociar</b></div>
+      </div>`;
+  }
+  else if (tab === 'cardio') {
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:18px; font-weight:700; margin-bottom:4px;">Incline Walk</div>
+        <div style="font-size:12px; color:var(--text2); margin-bottom:16px;">Después de cada sesión de gym — todos los días sin excepción</div>
+        <div class="stat-grid" style="gap:8px;">
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Speed</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Incline</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">25<span class="stat-unit">min</span></div>
+            <div class="stat-label">Duración</div>
+          </div>
+        </div>
+        <div style="margin-top:12px; font-size:12px; color:var(--text2); line-height:1.6;">
+          Quema grasa sin comprometer recuperación. Mejora capacidad aeróbica para aguantar ofensa y defensa completa en tochito. No negociable.
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Movilidad al despertar — días de gym mañana</div>
+        <div style="font-size:12px; color:var(--text2); margin-bottom:8px;">12 movimientos × 30s cada uno · ~7 min</div>
+        ${['Neck circles','Body bounces','Arm swings','Full twists','Downward to up dog','Squat + T-spine','Cossack','Straddle','90/90','Bridge pose','Tabletop','Toe touches'].map((m,i) => `<div style="font-size:12px; padding:5px 0; border-bottom:1px solid var(--border); display:flex; gap:10px;"><span style="color:var(--red); font-weight:600; min-width:18px;">${i+1}.</span>${m}</div>`).join('')}
+      </div>`;
+  }
+}
+
+// ─── SCREEN: HORARIO ─────────────────────────────────────────────────────────
+
+function renderHorario(dayIdx) {
+  const day = DAYS_DATA[dayIdx];
+  const el = document.getElementById('horarioContent');
+  
+  el.innerHTML = `
+    <div class="hero-banner" style="margin-bottom:16px;">
+      <div class="hero-day">${day.name}</div>
+      <div class="hero-title">${day.title}</div>
+      <div style="margin-top:6px;">${day.pills.map(([t,c]) => `<span class="pill pill-${c}">${t}</span>`).join('')}</div>
+    </div>
+    ${day.blocks.map((b, i) => `
+      <div class="timeline-item">
+        <div class="tl-time">${b.t}</div>
+        <div class="tl-line">
+          <div class="tl-dot ${b.c}"></div>
+          ${i < day.blocks.length - 1 ? '<div class="tl-connector"></div>' : ''}
+        </div>
+        <div class="tl-card">
+          <div class="tl-title">${b.ti}</div>
+          ${b.s ? `<div class="tl-sub">${b.s}</div>` : ''}
+        </div>
+      </div>`).join('')}
+  `;
+}
+
+function updateHorarioTabs(activeIdx) {
+  document.querySelectorAll('#horarioTabs .tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === activeIdx);
+  });
+}
+
+window.switchDayTab = function(idx) {
+  activeDayTab = idx;
+  updateHorarioTabs(idx);
+  renderHorario(idx);
+}
+
+// ─── SCREEN: PROGRESO ─────────────────────────────────────────────────────────
+
+function renderProgreso() {
+  // Peso actual
+  const weights = state.weights || [];
+  if (weights.length > 0) {
+    const sorted = [...weights].sort((a,b) => b.date.localeCompare(a.date));
+    const curr = sorted[0].value;
+    document.getElementById('currWeight').innerHTML = `${curr}<span class="stat-unit">kg</span>`;
+    const diff = (108.4 - curr).toFixed(1);
+    const kgLeft = (curr - 88).toFixed(1);
+    document.getElementById('weightChange').textContent = diff > 0 ? `-${diff}kg desde el inicio 🔥` : `Inicio del reto`;
+    document.getElementById('kgLeft').innerHTML = `${kgLeft > 0 ? kgLeft : 0}<span class="stat-unit">kg</span>`;
+    const pct = Math.max(0, Math.min(100, ((108.4 - curr) / (108.4 - 88) * 100))).toFixed(0);
+    document.getElementById('pctProgress').textContent = `${pct}% del camino`;
+  } else {
+    document.getElementById('currWeight').innerHTML = `—<span class="stat-unit">kg</span>`;
+    document.getElementById('weightChange').textContent = 'Sin registros aún';
+    document.getElementById('kgLeft').innerHTML = `—<span class="stat-unit">kg</span>`;
+    document.getElementById('pctProgress').textContent = '—% del camino';
+  }
+
+  // Weight history
+  const histEl = document.getElementById('weightHistory');
+  if (weights.length === 0) {
+    histEl.innerHTML = '<div style="color:var(--text2); font-size:13px; text-align:center; padding:12px;">Aún no hay registros. ¡Empieza a registrar tu peso!</div>';
+  } else {
+    const sorted = [...weights].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 10);
+    histEl.innerHTML = sorted.map((w, i) => {
+      const prev = sorted[i+1];
+      let diffHtml = '';
+      if (prev) {
+        const d = (w.value - prev.value).toFixed(1);
+        diffHtml = d < 0 ? `<span class="w-diff-neg">${d}kg</span>` : `<span class="w-diff-pos">+${d}kg</span>`;
+      }
+      const date = new Date(w.date + 'T12:00:00').toLocaleDateString('es-MX', {day:'numeric', month:'short'});
+      return `<div class="w-row"><span class="w-date">${date}</span><span class="w-val">${w.value} kg</span>${diffHtml}</div>`;
+    }).join('');
+  }
+
+  // Racha grid
+  const gridEl = document.getElementById('rachaGrid');
+  const dayNum = getDayNum();
+  let gridHtml = '';
+  for (let i = 1; i <= 90; i++) {
+    const startD = new Date(START_DATE);
+    startD.setDate(startD.getDate() + i - 1);
+    const key = `${startD.getFullYear()}-${String(startD.getMonth()+1).padStart(2,'0')}-${String(startD.getDate()).padStart(2,'0')}`;
+    const dayData = state.days && state.days[key];
+    const isToday = i === dayNum;
+    const isPast = i < dayNum;
+    let cls = 'day-dot';
+    if (isToday) cls += ' today';
+    if (dayData) {
+      const checks = dayData.checks || {};
+      const done = Object.values(checks).filter(Boolean).length;
+      if (done === INAMOVIBLES.length) cls += ' done';
+      else if (done > 0 && isPast) cls += ' fail';
+    }
+    gridHtml += `<div class="${cls}" title="Día ${i}"></div>`;
+  }
+  gridEl.innerHTML = gridHtml;
+
+  // Stats
+  document.getElementById('perfectCount').textContent = getPerfectDays();
+  const gymDays = Object.values(state.days || {}).filter(d => d.gym || (d.checks && d.checks.ejercicio)).length;
+  document.getElementById('gymCount').textContent = gymDays;
+}
+
+// ─── SCREEN: MÁS ─────────────────────────────────────────────────────────────
+
+window.switchMasTab = function(tab) {
+  activeMasTab = tab;
+  document.querySelectorAll('#screen-mas .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderMas(tab);
+}
+
+function renderMas(tab) {
+  const el = document.getElementById('masContent');
+  if (tab === 'nutricion') {
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:18px; font-weight:700; margin-bottom:4px;">Tus macros diarios</div>
+        <div style="font-size:11px; color:var(--text2); margin-bottom:14px;">Calculados para bajar ~1kg/semana</div>
+        <div class="stat-grid">
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">2,030<span class="stat-unit" style="font-size:12px;">kcal</span></div>
+            <div class="stat-label">Calorías</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">98<span class="stat-unit">g</span></div>
+            <div class="stat-label">Proteína</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">263<span class="stat-unit">g</span></div>
+            <div class="stat-label">Carbos</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div class="stat-num">65<span class="stat-unit">g</span></div>
+            <div class="stat-label">Grasas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Las 3 bases — en casa</div>
+        ${[
+          ['A','Huevos','3-4 huevos + tortilla maíz (max 2) o queso panela + jamón de pavo + nopal/jitomate/espinaca'],
+          ['B','Proteína principal','Pollo, carne magra, pescado o atún + arroz integral o frijoles + verduras'],
+          ['C','Shake proteína','1 scoop + agua o leche descremada + platano o avena (post-gym)'],
+        ].map(([l,n,d]) => `
+          <div style="display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); align-items:flex-start;">
+            <div style="background:var(--red); color:#fff; font-size:11px; font-weight:700; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${l}</div>
+            <div><div style="font-size:13px; font-weight:600;">${n}</div><div style="font-size:11px; color:var(--text2); margin-top:2px;">${d}</div></div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">✅ Siempre permitido</div>
+        ${['Huevos','Pollo, carne magra, pescado, atún','Verduras (brócoli, espinaca, nopal, calabaza)','Frijoles, lentejas','Arroz integral (porciones moderadas)','Tortilla de maíz (máx 3/día)','Avena','Fruta entera (no jugo) — máx 2 porciones','Agua, mineral, café/té sin azúcar, Clight máx 1/día'].map(i => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">✓ ${i}</div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px; color:var(--red);">🚫 Nunca en 90 días</div>
+        ${['Refresco regular','Jugo embotellado o natural','Pan dulce, pastel, galletas','Papas fritas, chicharrón','Dulces, chocolates, gomitas','Alcohol'].map(i => `<div style="font-size:12px; color:var(--text2); padding:4px 0; border-bottom:1px solid var(--border);">✗ ${i}</div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">⚡ Suplementos</div>
+        ${[
+          ['Al despertar','Agua','1 vaso grande. Lo primero del día.'],
+          ['En ayunas','Colágeno','Con un poco de Clight para saborizar.'],
+          ['Con desayuno','Creatina 5g','Todos los días sin saltarse.'],
+          ['Post gym (1h)','Proteína (1 scoop)','Solo 1 al día. Ya sea gym mañana o tarde.'],
+        ].map(([c,n,d]) => `
+          <div style="display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); align-items:flex-start;">
+            <div style="font-size:10px; color:var(--red); font-weight:600; min-width:70px; padding-top:2px;">${c}</div>
+            <div><div style="font-size:13px; font-weight:600;">${n}</div><div style="font-size:11px; color:var(--text2);">${d}</div></div>
+          </div>`).join('')}
+      </div>`;
+  }
+  else if (tab === 'claridad') {
+    if (!state.claridad) state.claridad = {};
+    const dayNum = getDayNum();
+    el.innerHTML = `
+      <div class="alert alert-gray" style="margin-bottom:16px;">⭐ Solo tú sabes qué significa este tracking. Privado y tuyo.</div>
+      
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="font-size:14px; font-weight:700;">Zona Claridad — 90 días</div>
+          <div style="font-size:13px; font-weight:700; color:var(--green);">${Object.values(state.claridad).filter(Boolean).length} / ${dayNum}</div>
+        </div>
+        <div class="claridad-grid" id="claridadGrid"></div>
+        <div style="margin-top:12px; font-size:11px; color:var(--text2);">Toca cada día para marcarlo. El día de hoy tiene borde rojo.</div>
+      </div>`;
+    
+    const grid = document.getElementById('claridadGrid');
+    let html = '';
+    for (let i = 1; i <= 90; i++) {
+      const done = state.claridad[i];
+      const isToday = i === dayNum;
+      const isPast = i < dayNum;
+      html += `<div class="cla-box ${done?'done':''} ${isToday?'today':''}" onclick="toggleClaridad(${i})" title="Día ${i}">${isPast || isToday ? i : ''}</div>`;
+    }
+    grid.innerHTML = html;
+  }
+  else if (tab === 'trabajo') {
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:12px;">3 Líneas de negocio</div>
+        ${[
+          ['1','Empleo remoto','Meta: contratado antes del día 20-30','8 aplicaciones/semana en LinkedIn. Follow up a los 5 días.','red'],
+          ['2','Agencia de contenido','Meta: primer cliente antes del día 30-40','1 propuesta o contacto comercial por semana.','blue'],
+          ['3','YouTube automatizado','Primer video: antes del día 7. Luego 1 diario.','Meta: 3-4 canales activos al día 90.','green'],
+        ].map(([n,t,m,d,c]) => `
+          <div style="border-bottom:1px solid var(--border); padding:12px 0;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="background:var(--${c}); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;">${n}</span>
+              <span style="font-size:13px; font-weight:700;">${t}</span>
+            </div>
+            <div style="font-size:11px; color:var(--red); font-weight:600; margin-bottom:2px;">${m}</div>
+            <div style="font-size:11px; color:var(--text2);">${d}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:10px;">💰 Finanzas</div>
+        ${['Diezmo: 10% de todo ingreso desde el primer peso. Primero Dios.','Seguro médico: 2,000 pesos antes del 1 de julio. Urgente.','Mapeo de deuda: antes del día 7 — lista completa a quién y cuánto.','No generas deuda nueva durante los 90 días.'].map(i => `<div style="font-size:12px; color:var(--text2); padding:5px 0; border-bottom:1px solid var(--border);">• ${i}</div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Metas por semana</div>
+        ${[
+          ['1-2','8 apps/semana + canal YT + primer video'],
+          ['3-4','Primeras entrevistas + 5 videos + primer contacto agencia'],
+          ['5-6','Seguimiento entrevistas + primer cliente agencia'],
+          ['7-8','Empleo remoto cerrado + ingresos agencia activos'],
+          ['9-10','YT con tracción + canal #2 iniciado'],
+          ['11-13','Escalar: canal #3/#4 + más clientes'],
+        ].map(([s,m]) => `
+          <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:10px; font-weight:700; color:var(--red); min-width:40px; padding-top:2px;">Sem ${s}</span>
+            <span style="font-size:12px; color:var(--text2);">${m}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+  else if (tab === 'emergencias') {
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:12px;">3 Reglas universales</div>
+        ${[
+          ['🥤','La bebida NUNCA negocia','En cualquier lugar: agua, mineral o Clight. Sin excepción. Cero refresco, cero jugo.'],
+          ['🍗','Proteína primero','En cualquier menú, elige lo más proteico. Come eso primero.'],
+          ['📅','Planea, no cancelas','Los inamovibles se acomodan. El gym no se cancela — se anticipa.'],
+        ].map(([icon,t,d]) => `
+          <div style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border);">
+            <div style="font-size:22px; flex-shrink:0;">${icon}</div>
+            <div><div style="font-size:13px; font-weight:700; margin-bottom:3px;">${t}</div><div style="font-size:12px; color:var(--text2);">${d}</div></div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div style="font-size:14px; font-weight:700; margin-bottom:10px;">Por situación</div>
+        ${[
+          ['🌮','Taquería','Maíz, pollo o bistec, sin crema, máx 3-4, agua.'],
+          ['🍽️','Restaurante (tu decisión)','Plato más proteico. Sin papas, sin postre, sin refresco.'],
+          ['👥','Reunión social','Plato completo permitido (alitas, carne). Sin refresco, sin postre.'],
+          ['🔥','Carne asada','Come normal. Un volcancito está bien. Sin refresco.'],
+          ['👨‍👩‍👦','Comida familiar','Proteína primero, porción normal, sin refresco ni pan dulce.'],
+          ['🎉','Fiesta','Come antes si puedes. Agua toda la noche. Proteína primero.'],
+          ['💬','Alguien insiste','"Estoy cuidándome." No tienes que explicar nada.'],
+        ].map(([icon,t,d]) => `
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);">
+            <div style="font-size:18px; flex-shrink:0;">${icon}</div>
+            <div><div style="font-size:12px; font-weight:700; margin-bottom:2px;">${t}</div><div style="font-size:11px; color:var(--text2);">${d}</div></div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+window.toggleClaridad = function(day) {
+  if (!state.claridad) state.claridad = {};
+  state.claridad[day] = !state.claridad[day];
+  saveData();
+  renderMas('claridad');
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+
+window.showScreen = function(name) {
+  activeScreen = name;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+
+  if (name === 'progreso') renderProgreso();
+  if (name === 'mas') renderMas(activeMasTab);
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+
+loadData();
+
+</script>
+</body>
+</html>
